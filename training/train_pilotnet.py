@@ -19,8 +19,7 @@ def train():
     # 1. Hyperparameters
     # =====================
     csv_filename = "data_labels_uniform.csv"
-    USER_NAME = "YJU"
-    dataset_root = f"C:/Users/{USER_NAME}/Desktop/dataset"
+    dataset_root = "C:/Users/YJU/Desktop/dataset"
     num_epochs = 20
     batch_size = 128
     learning_rate = 5e-4
