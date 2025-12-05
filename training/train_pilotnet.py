@@ -1,5 +1,3 @@
-# training/train_pilotnet.py
-
 import os
 import time
 import torch
@@ -18,7 +16,8 @@ def train():
     # =====================
     # 1. Hyperparameters
     # =====================
-    csv_filename = "data_labels_updated"
+    # 최종 균등화된 파일 이름 사용
+    csv_filename = "data_labels_clean" 
     dataset_root = "C:/Users/YJU/Desktop/dataset"
     num_epochs = 20
     batch_size = 128
@@ -69,7 +68,9 @@ def train():
     print(f"[INFO] test  samples = {len(test_dataset)}")
 
     pin_memory = (device.type == "cuda")
-    num_workers = 12 if device.type == "cuda" else 4
+    
+    # 🚨 CRITICAL FIX: num_workers를 0으로 설정하여 Windows 파일 접근 충돌을 해결
+    num_workers = 0 
 
     train_loader = DataLoader(
         train_dataset,
@@ -77,8 +78,8 @@ def train():
         shuffle=True,
         num_workers=num_workers,
         pin_memory=pin_memory,
-        persistent_workers=True,
-        prefetch_factor=4,
+        persistent_workers=(num_workers > 0), # num_workers가 0보다 클 때만 사용
+        prefetch_factor=2 if num_workers > 0 else None,
     )
 
     test_loader = DataLoader(
@@ -87,8 +88,8 @@ def train():
         shuffle=False,
         num_workers=num_workers,
         pin_memory=pin_memory,
-        persistent_workers=True,
-        prefetch_factor=4,
+        persistent_workers=(num_workers > 0),
+        prefetch_factor=2 if num_workers > 0 else None,
     )
 
     # =====================
@@ -98,8 +99,8 @@ def train():
 
     criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
     optimizer = optim.Adam(model.parameters(),
-                           lr=learning_rate,
-                           weight_decay=weight_decay)
+                            lr=learning_rate,
+                            weight_decay=weight_decay)
 
     # =====================
     # 4. Train + Eval Loop

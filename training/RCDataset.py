@@ -1,5 +1,3 @@
-# training/RCDataset.py
-
 import os
 import cv2
 import pandas as pd
@@ -26,7 +24,7 @@ class RCDataset(Dataset):
         shuffle: bool = True,
         random_seed: int = 42
     ):
-
+        
         # ----------------------------
         # 0) 경로 정리
         # ----------------------------
@@ -42,9 +40,9 @@ class RCDataset(Dataset):
         self.df_full = pd.read_csv(csv_path)
 
         # ============================
-        # CSV 컬럼명 검증
+        # CSV 컬럼명 검증 (수정 완료)
         # ============================
-        required_cols = ["image_filename", "steering_angle"]
+        required_cols = ["image_path", "servo_angle"]
         for col in required_cols:
             if col not in self.df_full.columns:
                 raise ValueError(f"[ERROR] CSV must contain column '{col}'")
@@ -60,7 +58,7 @@ class RCDataset(Dataset):
             )
 
         # -------------------------------
-        # 2) split 없으면 stratified split
+        # 2) split 없으면 stratified split (수정 완료)
         # -------------------------------
         else:
             print("[RCDataset] Performing stratified split...")
@@ -69,7 +67,7 @@ class RCDataset(Dataset):
                 self.df_full = self.df_full.sample(frac=1.0, random_state=random_seed)
 
             df_list = []
-            for angle, df_group in self.df_full.groupby("steering_angle"):
+            for angle, df_group in self.df_full.groupby("servo_angle"):
                 n = len(df_group)
                 n_train = int(n * split_ratio)
 
@@ -83,13 +81,13 @@ class RCDataset(Dataset):
             self.df = pd.concat(df_list).reset_index(drop=True)
 
         # -------------------------------
-        # 3) angle → class index 매핑
+        # 3) angle → class index 매핑 (수정 완료)
         # -------------------------------
-        self.angles = sorted(self.df["steering_angle"].unique().tolist())
+        self.angles = sorted(self.df["servo_angle"].unique().tolist())
         self.angle_to_idx = {a: i for i, a in enumerate(self.angles)}
 
         print(f"[RCDataset:{split}] samples={len(self.df)}")
-        print(self.df["steering_angle"].value_counts().sort_index())
+        print(self.df["servo_angle"].value_counts().sort_index())
 
     def __len__(self):
         return len(self.df)
@@ -98,19 +96,23 @@ class RCDataset(Dataset):
         row = self.df.iloc[idx]
 
         # --------------------------------------
-        # 1) 이미지 경로 생성
+        # 1) 이미지 경로 생성 (최종 수정: 하위 폴더 제거)
         # --------------------------------------
-        filename = str(row["image_filename"]).replace("\\", "/")
-        img_path = f"{self.image_root}/{filename}"
-
+        filename = str(row["image_path"]).replace("\\", "/")
+        
+        # 🚨 코드 최종 확인: CSV와 이미지 파일이 'dataset' 폴더 바로 아래에 있다고 가정
+        img_path = f"{self.image_root}/{filename}" 
+        
         img_bgr = cv2.imread(img_path)
+        
         if img_bgr is None:
-            raise RuntimeError(f"[ERROR] Failed to read image: {img_path}")
+            print(f"[DEBUG] Attempted path: {img_path}") 
+            raise RuntimeError(f"[ERROR] Failed to read image: {img_path}. 파일이 'dataset' 폴더 바로 아래에 있는지 확인해주세요.")
 
         # --------------------------------------
-        # 2) steering_angle 가져오기
+        # 2) servo_angle 가져오기 (수정 완료)
         # --------------------------------------
-        angle = int(row["steering_angle"])
+        angle = int(row["servo_angle"])
 
         # --------------------------------------
         # 3) augmentation (train only)
@@ -130,4 +132,3 @@ class RCDataset(Dataset):
         label = self.angle_to_idx[angle]
 
         return img_tensor, label
-

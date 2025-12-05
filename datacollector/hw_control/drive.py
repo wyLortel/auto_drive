@@ -75,10 +75,10 @@ def activate_jetson_pwm(auto_install_busybox=True):
 
 # ================= CONSTANTS ====================
 # Jetson BOARD 핀 번호
-MOTOR_PWM_PIN         = 33   # DC 모터 PWM 핀
-MOTOR_DIRECTION_PIN1  = 29   # L298N IN2
-MOTOR_DIRECTION_PIN2  = 31   # L298N IN1
-SERVO_PWM_PIN         = 32   # 서보 PWM 핀
+MOTOR_PWM_PIN         = 32   # DC 모터 PWM 핀
+MOTOR_DIRECTION_PIN1  = 21   # L298N IN2
+MOTOR_DIRECTION_PIN2  = 29   # L298N IN1
+SERVO_PWM_PIN         = 33   # 서보 PWM 핀
 
 # PWM 설정 값
 MOTOR_PWM_FREQUENCY   = 1000  # DC 모터 PWM 주파수 (Hz)
