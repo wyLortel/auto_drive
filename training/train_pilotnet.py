@@ -18,7 +18,7 @@ def train():
     # =====================
     # 1. Hyperparameters
     # =====================
-    csv_filename = "data_labels_uniform.csv"
+    csv_filename = "data_labels_updated"
     dataset_root = "C:/Users/YJU/Desktop/dataset"
     num_epochs = 20
     batch_size = 128
